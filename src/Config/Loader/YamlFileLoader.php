@@ -1,25 +1,45 @@
 <?php
-
 /*
- * This file is part of the Symfony package.
+ * Copyright (c) 2014 KUBO Atsuhiro <kubo@iteman.jp>,
+ * All rights reserved.
  *
- * (c) Fabien Potencier <fabien@symfony.com>
+ * This file is part of Formal BEAR.
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This program and the accompanying materials are made available under
+ * the terms of the BSD 2-Clause License which accompanies this
+ * distribution, and is available at http://opensource.org/licenses/BSD-2-Clause
  */
 
-namespace Symfony\Component\DependencyInjection\Loader;
+/*
+ * Copyright (c) 2004-2014 Fabien Potencier <fabien@symfony.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is furnished
+ * to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
-use Symfony\Component\DependencyInjection\Alias;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+namespace PHPMentors\FormalBEAR\Config\Loader;
+
+use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\Yaml\Parser as YamlParser;
-use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Yaml\Parser;
+
+use PHPMentors\FormalBEAR\Config\ConfigCollection;
 
 /**
  * YamlFileLoader loads YAML files service definitions.
@@ -27,10 +47,32 @@ use Symfony\Component\ExpressionLanguage\Expression;
  * The YAML format does not support anonymous services (cf. the XML loader).
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ * @author KUBO Atsuhiro <kubo@iteman.jp>
+ * @see https://github.com/symfony/symfony/blob/2314328b163a492caf7958ce1b108520687323e7/src/Symfony/Component/DependencyInjection/Loader/YamlFileLoader.php
  */
 class YamlFileLoader extends FileLoader
 {
-    private $yamlParser;
+    /**
+     * @var \PHPMentors\FormalBEAR\Config\ConfigCollection
+     */
+    private $configCollection;
+
+    /**
+     * @var \Symfony\Component\Yaml\Parser
+     */
+    private $parser;
+
+    /**
+     * @param \PHPMentors\FormalBEAR\Config\ConfigCollection $configCollection
+     * @param \Symfony\Component\Config\FileLocatorInterface $locator
+     */
+    public function __construct(ConfigCollection $configCollection, FileLocatorInterface $locator)
+    {
+        parent::__construct($locator);
+
+        $this->configCollection = $configCollection;
+        $this->parser = new Parser();
+    }
 
     /**
      * Loads a Yaml file.
@@ -44,7 +86,7 @@ class YamlFileLoader extends FileLoader
 
         $content = $this->loadFile($path);
 
-        $this->container->addResource(new FileResource($path));
+        $this->configCollection->addResource(new FileResource($path));
 
         // empty file
         if (null === $content) {
@@ -57,15 +99,12 @@ class YamlFileLoader extends FileLoader
         // parameters
         if (isset($content['parameters'])) {
             foreach ($content['parameters'] as $key => $value) {
-                $this->container->setParameter($key, $this->resolveServices($value));
+                $this->configCollection->setParameter($key, $value);
             }
         }
 
         // extensions
         $this->loadFromExtensions($content);
-
-        // services
-        $this->parseDefinitions($content, $file);
     }
 
     /**
@@ -74,7 +113,7 @@ class YamlFileLoader extends FileLoader
      * @param mixed  $resource A resource
      * @param string $type     The resource type
      *
-     * @return bool    true if this class supports the given resource, false otherwise
+     * @return bool true if this class supports the given resource, false otherwise
      */
     public function supports($resource, $type = null)
     {
@@ -95,151 +134,12 @@ class YamlFileLoader extends FileLoader
 
         foreach ($content['imports'] as $import) {
             $this->setCurrentDir(dirname($file));
-            $this->import($import['resource'], null, isset($import['ignore_errors']) ? (bool) $import['ignore_errors'] : false, $file);
-        }
-    }
-
-    /**
-     * Parses definitions
-     *
-     * @param array  $content
-     * @param string $file
-     */
-    private function parseDefinitions($content, $file)
-    {
-        if (!isset($content['services'])) {
-            return;
-        }
-
-        foreach ($content['services'] as $id => $service) {
-            $this->parseDefinition($id, $service, $file);
-        }
-    }
-
-    /**
-     * Parses a definition.
-     *
-     * @param string $id
-     * @param array  $service
-     * @param string $file
-     *
-     * @throws InvalidArgumentException When tags are invalid
-     */
-    private function parseDefinition($id, $service, $file)
-    {
-        if (is_string($service) && 0 === strpos($service, '@')) {
-            $this->container->setAlias($id, substr($service, 1));
-
-            return;
-        } elseif (isset($service['alias'])) {
-            $public = !array_key_exists('public', $service) || (bool) $service['public'];
-            $this->container->setAlias($id, new Alias($service['alias'], $public));
-
-            return;
-        }
-
-        if (isset($service['parent'])) {
-            $definition = new DefinitionDecorator($service['parent']);
-        } else {
-            $definition = new Definition();
-        }
-
-        if (isset($service['class'])) {
-            $definition->setClass($service['class']);
-        }
-
-        if (isset($service['scope'])) {
-            $definition->setScope($service['scope']);
-        }
-
-        if (isset($service['synthetic'])) {
-            $definition->setSynthetic($service['synthetic']);
-        }
-
-        if (isset($service['synchronized'])) {
-            $definition->setSynchronized($service['synchronized']);
-        }
-
-        if (isset($service['lazy'])) {
-            $definition->setLazy($service['lazy']);
-        }
-
-        if (isset($service['public'])) {
-            $definition->setPublic($service['public']);
-        }
-
-        if (isset($service['abstract'])) {
-            $definition->setAbstract($service['abstract']);
-        }
-
-        if (isset($service['factory_class'])) {
-            $definition->setFactoryClass($service['factory_class']);
-        }
-
-        if (isset($service['factory_method'])) {
-            $definition->setFactoryMethod($service['factory_method']);
-        }
-
-        if (isset($service['factory_service'])) {
-            $definition->setFactoryService($service['factory_service']);
-        }
-
-        if (isset($service['file'])) {
-            $definition->setFile($service['file']);
-        }
-
-        if (isset($service['arguments'])) {
-            $definition->setArguments($this->resolveServices($service['arguments']));
-        }
-
-        if (isset($service['properties'])) {
-            $definition->setProperties($this->resolveServices($service['properties']));
-        }
-
-        if (isset($service['configurator'])) {
-            if (is_string($service['configurator'])) {
-                $definition->setConfigurator($service['configurator']);
+            if (is_string($import)) {
+                $this->import($import, null, false, $file);
             } else {
-                $definition->setConfigurator(array($this->resolveServices($service['configurator'][0]), $service['configurator'][1]));
+                $this->import($import['resource'], null, isset($import['ignore_errors']) ? (bool) $import['ignore_errors'] : false, $file);
             }
         }
-
-        if (isset($service['calls'])) {
-            foreach ($service['calls'] as $call) {
-                $args = isset($call[1]) ? $this->resolveServices($call[1]) : array();
-                $definition->addMethodCall($call[0], $args);
-            }
-        }
-
-        if (isset($service['tags'])) {
-            if (!is_array($service['tags'])) {
-                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s" in %s.', $id, $file));
-            }
-
-            foreach ($service['tags'] as $tag) {
-                if (!isset($tag['name'])) {
-                    throw new InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key for service "%s" in %s.', $id, $file));
-                }
-
-                $name = $tag['name'];
-                unset($tag['name']);
-
-                foreach ($tag as $attribute => $value) {
-                    if (!is_scalar($value) && null !== $value) {
-                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s", attribute "%s" in %s.', $id, $name, $attribute, $file));
-                    }
-                }
-
-                $definition->addTag($name, $tag);
-            }
-        }
-
-        if (isset($service['decorates'])) {
-            $renameId = isset($service['decoration_inner_name']) ? $service['decoration_inner_name'] : null;
-            $definition->setDecoratedService($service['decorates'], $renameId);
-        }
-
-        $this->container->setDefinition($id, $definition);
     }
 
     /**
@@ -252,18 +152,14 @@ class YamlFileLoader extends FileLoader
     protected function loadFile($file)
     {
         if (!stream_is_local($file)) {
-            throw new InvalidArgumentException(sprintf('This is not a local file "%s".', $file));
+            throw new \InvalidArgumentException(sprintf('This is not a local file "%s".', $file));
         }
 
         if (!file_exists($file)) {
-            throw new InvalidArgumentException(sprintf('The service file "%s" is not valid.', $file));
+            throw new \InvalidArgumentException(sprintf('The service file "%s" is not valid.', $file));
         }
 
-        if (null === $this->yamlParser) {
-            $this->yamlParser = new YamlParser();
-        }
-
-        return $this->validate($this->yamlParser->parse(file_get_contents($file)), $file);
+        return $this->validate($this->parser->parse(file_get_contents($file)), $file);
     }
 
     /**
@@ -283,67 +179,16 @@ class YamlFileLoader extends FileLoader
         }
 
         if (!is_array($content)) {
-            throw new InvalidArgumentException(sprintf('The service file "%s" is not valid.', $file));
+            throw new \InvalidArgumentException(sprintf('The service file "%s" is not valid.', $file));
         }
 
         foreach (array_keys($content) as $namespace) {
-            if (in_array($namespace, array('imports', 'parameters', 'services'))) {
+            if (in_array($namespace, ['imports', 'parameters'])) {
                 continue;
-            }
-
-            if (!$this->container->hasExtension($namespace)) {
-                $extensionNamespaces = array_filter(array_map(function ($ext) { return $ext->getAlias(); }, $this->container->getExtensions()));
-                throw new InvalidArgumentException(sprintf(
-                    'There is no extension able to load the configuration for "%s" (in %s). Looked for namespace "%s", found %s',
-                    $namespace,
-                    $file,
-                    $namespace,
-                    $extensionNamespaces ? sprintf('"%s"', implode('", "', $extensionNamespaces)) : 'none'
-                ));
             }
         }
 
         return $content;
-    }
-
-    /**
-     * Resolves services.
-     *
-     * @param string $value
-     *
-     * @return Reference
-     */
-    private function resolveServices($value)
-    {
-        if (is_array($value)) {
-            $value = array_map(array($this, 'resolveServices'), $value);
-        } elseif (is_string($value) &&  0 === strpos($value, '@=')) {
-            return new Expression(substr($value, 2));
-        } elseif (is_string($value) &&  0 === strpos($value, '@')) {
-            if (0 === strpos($value, '@@')) {
-                $value = substr($value, 1);
-                $invalidBehavior = null;
-            } elseif (0 === strpos($value, '@?')) {
-                $value = substr($value, 2);
-                $invalidBehavior = ContainerInterface::IGNORE_ON_INVALID_REFERENCE;
-            } else {
-                $value = substr($value, 1);
-                $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE;
-            }
-
-            if ('=' === substr($value, -1)) {
-                $value = substr($value, 0, -1);
-                $strict = false;
-            } else {
-                $strict = true;
-            }
-
-            if (null !== $invalidBehavior) {
-                $value = new Reference($value, $invalidBehavior, $strict);
-            }
-        }
-
-        return $value;
     }
 
     /**
@@ -354,15 +199,15 @@ class YamlFileLoader extends FileLoader
     private function loadFromExtensions($content)
     {
         foreach ($content as $namespace => $values) {
-            if (in_array($namespace, array('imports', 'parameters', 'services'))) {
+            if (in_array($namespace, ['imports', 'parameters'])) {
                 continue;
             }
 
             if (!is_array($values)) {
-                $values = array();
+                $values = [];
             }
 
-            $this->container->loadFromExtension($namespace, $values);
+            $this->configCollection->add($namespace, $values);
         }
     }
 }

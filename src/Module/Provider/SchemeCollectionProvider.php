@@ -1,24 +1,39 @@
 <?php
-/**
- * This file is part of the BEAR.Sunday package
+/*
+ * Copyright (c) 2014 KUBO Atsuhiro <kubo@iteman.jp>,
+ * All rights reserved.
  *
- * @license http://opensource.org/licenses/bsd-license.php BSD
+ * This file is part of Formal BEAR.
+ *
+ * This program and the accompanying materials are made available under
+ * the terms of the BSD 2-Clause License which accompanies this
+ * distribution, and is available at http://opensource.org/licenses/BSD-2-Clause
  */
-namespace BEAR\Resource\Module;
 
-use BEAR\Resource\Adapter\App as AppAdapter;
-use BEAR\Resource\Adapter\Http as HttpAdapter;
+/*
+ * Copyright (c) 2013-2014 Akihito Koriyama <akihito.koriyama@gmail.com>,
+ * All rights reserved.
+ *
+ * This program and the accompanying materials are made available under
+ * the terms of the BSD 3-Clause License which accompanies this
+ * distribution, and is available at http://opensource.org/licenses/BSD-3-Clause
+ */
+
+namespace PHPMentors\FormalBEAR\Module\Provider;
+
+use BEAR\Resource\Adapter\Http;
 use BEAR\Resource\Exception\AppName;
 use BEAR\Resource\SchemeCollection;
-use Ray\Di\ProviderInterface as Provide;
+use Ray\Di\ProviderInterface;
 use Ray\Di\InstanceInterface;
 use Ray\Di\Di\Inject;
 use Ray\Di\Di\Named;
+use PHPMentors\FormalBEAR\Resource\AppAdapter;
 
 /**
  * SchemeCollection provider
  */
-class SchemeCollectionProvider implements Provide
+class SchemeCollectionProvider implements ProviderInterface
 {
     /**
      * @var string
@@ -31,7 +46,7 @@ class SchemeCollectionProvider implements Provide
     protected $resourceDir;
 
     /**
-     * @var InstanceInterface
+     * @var \Ray\Di\InstanceInterface
      */
     protected $injector;
 
@@ -46,15 +61,16 @@ class SchemeCollectionProvider implements Provide
      */
     public function setAppName($appName, $resourceDir)
     {
-        if (! is_string($appName)) {
+        if (!is_string($appName)) {
             throw new AppName($appName);
         }
+
         $this->appName = $appName;
         $this->resourceDir = $resourceDir;
     }
 
     /**
-     * @param InstanceInterface $injector
+     * @param \Ray\Di\InstanceInterface $injector
      *
      * @Inject
      */
@@ -66,16 +82,16 @@ class SchemeCollectionProvider implements Provide
     /**
      * Return instance
      *
-     * @return SchemeCollection
+     * @return \BEAR\Resource\SchemeCollection
      */
     public function get()
     {
-        $schemeCollection = new SchemeCollection;
+        $schemeCollection = new SchemeCollection();
         $pageAdapter = new AppAdapter($this->injector, $this->appName, 'Resource\Page', $this->resourceDir . '/Page');
         $appAdapter = new AppAdapter($this->injector, $this->appName, 'Resource\App', $this->resourceDir . '/App');
         $schemeCollection->scheme('page')->host('self')->toAdapter($pageAdapter);
         $schemeCollection->scheme('app')->host('self')->toAdapter($appAdapter);
-        $schemeCollection->scheme('http')->host('*')->toAdapter(new HttpAdapter);
+        $schemeCollection->scheme('http')->host('*')->toAdapter(new Http());
 
         return $schemeCollection;
     }

@@ -1,0 +1,40 @@
+{
+    "name": "phpmentors/formal-bear",
+    "description": "An application framework based on BEAR.Sunday",
+    "keywords": [
+        "BEAR.Sunday",
+        "aop",
+        "api",
+        "di",
+        "framework",
+        "hypermedia",
+        "rest"
+    ],
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "KUBO Atsuhiro",
+            "email": "kubo@iteman.jp"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+        "bear/package": "~0.11",
+        "doctrine/inflector": "~1.0",
+        "ray/di": "~1.3",
+        "symfony/config": "~2.3",
+        "symfony/dependency-injection": "~2.3",
+        "symfony/yaml": "~2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "PHPMentors\\FormalBEAR\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
