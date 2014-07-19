@@ -18,7 +18,6 @@ use Ray\Di\AbstractModule;
 use Ray\Di\ModuleStringerInterface;
 use Symfony\Component\Config\Definition\Processor;
 
-use PHPMentors\FormalBEAR\Config\ConfigAwareInterface;
 use PHPMentors\FormalBEAR\Config\ConfigCollection;
 
 abstract class TransformationModule extends AbstractModule implements ConfigAwareInterface

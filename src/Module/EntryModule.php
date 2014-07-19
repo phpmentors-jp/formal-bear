@@ -16,7 +16,6 @@ use Ray\Aop\AbstractMatcher;
 use Ray\Di\AbstractModule;
 use Ray\Di\ModuleStringerInterface;
 
-use PHPMentors\FormalBEAR\Config\ConfigAwareInterface;
 use PHPMentors\FormalBEAR\Config\ConfigReader;
 
 abstract class EntryModule extends AbstractModule implements ConfigAwareInterface
