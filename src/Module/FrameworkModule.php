@@ -83,15 +83,15 @@ class FrameworkModule extends TransformationModule
     {
         // Sunday Module
         $this->install(new NamedModule($this->createNamedConstants($config)));
-        $this->install(new CacheModule($this));
-        $this->install(new CachedAnnotationModule($this));
+        $this->install(new CacheModule());
+        $this->install(new CachedAnnotationModule());
 
         // Package Module
         $this->install(new CacheAspectModule($this));
-        $this->install(new DiCompilerModule($this));
-        $this->install(new DiModule($this));
-        $this->install(new ExceptionHandleModule($this));
-        $this->install(new NamedArgsModule($this));
+        $this->install(new DiCompilerModule());
+        $this->install(new DiModule());
+        $this->install(new ExceptionHandleModule());
+        $this->install(new NamedArgsModule());
         $this->install(new ResourceClientModule($config['app_name'], $config['resource_dir']));
         $this->install(new SignalParamModule($this, $config['signal_parameters']));
 
@@ -99,22 +99,22 @@ class FrameworkModule extends TransformationModule
         $this->install(new EmbedResourceModule($this));
 
         // Provide module (BEAR.Sunday extension interfaces)
-        $this->install(new HttpFoundationModule($this));
-        $this->install(new ConsoleOutputModule($this));
-        $this->install(new WebRouterModule($this));
-        $this->install(new TemplateEngineRendererModule($this));
+        $this->install(new HttpFoundationModule());
+        $this->install(new ConsoleOutputModule());
+        $this->install(new WebRouterModule());
+        $this->install(new TemplateEngineRendererModule());
 
         // Contextual Binding
         if ($this->context == 'api') {
-            $this->install(new HalModule($this));
+            $this->install(new HalModule());
         } elseif ($this->context == 'prod') {
             $this->install(new CacheAspectModule($this));
         } elseif ($this->context == 'dev') {
-            $this->install(new ApplicationLoggerModule($this));
-            $this->install(new DevResourceModule($this));
-            $this->install(new DevApplicationLoggerModule($this));
+            $this->install(new ApplicationLoggerModule());
+            $this->install(new DevResourceModule());
+            $this->install(new DevApplicationLoggerModule());
         } elseif ($this->context == 'test') {
-            $this->install(new NullCacheModule($this));
+            $this->install(new NullCacheModule());
         }
 
         $this->bind('BEAR\Sunday\Extension\Application\AppInterface')->to($config['app_class'])->in(Scope::SINGLETON);
