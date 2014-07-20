@@ -18,6 +18,7 @@ use BEAR\Package\Module\Di\DiCompilerModule;
 use BEAR\Package\Module\Di\DiModule;
 use BEAR\Package\Module\Resource\DevResourceModule;
 use BEAR\Package\Module\Resource\NullCacheModule;
+use BEAR\Package\Module\Resource\ResourceModule;
 use BEAR\Package\Module\Resource\SignalParamModule;
 use BEAR\Package\Provide\ApplicationLogger\ApplicationLoggerModule;
 use BEAR\Package\Provide\ApplicationLogger\DevApplicationLoggerModule;
@@ -27,7 +28,6 @@ use BEAR\Package\Provide\ResourceView\TemplateEngineRendererModule;
 use BEAR\Package\Provide\Router\WebRouterModule;
 use BEAR\Package\Provide\WebResponse\HttpFoundationModule;
 use BEAR\Resource\Module\EmbedResourceModule;
-use BEAR\Resource\Module\NamedArgsModule;
 use BEAR\Sunday\Module\Cache\CacheModule;
 use BEAR\Sunday\Module\Code\CachedAnnotationModule;
 use BEAR\Sunday\Module\Constant\NamedModule;
@@ -82,6 +82,7 @@ class FrameworkModule extends TransformationModule
     protected function transform(array $config)
     {
         $this->bind('BEAR\Sunday\Extension\Application\AppInterface')->to($config['app_class'])->in(Scope::SINGLETON);
+        $this->bind('BEAR\Resource\SchemeCollectionInterface')->toProvider('PHPMentors\FormalBEAR\Module\Provider\SchemeCollectionProvider')->in(Scope::SINGLETON);
 
         // Sunday Module
         $this->install(new NamedModule($this->createNamedConstants($config)));
@@ -93,8 +94,7 @@ class FrameworkModule extends TransformationModule
         $this->install(new DiCompilerModule());
         $this->install(new DiModule());
         $this->install(new ExceptionHandleModule());
-        $this->install(new NamedArgsModule());
-        $this->install(new ResourceClientModule($config['app_name'], $config['resource_dir']));
+        $this->install(new ResourceModule($config['app_name'], $config['resource_dir']));
         $this->install(new SignalParamModule($this, $config['signal_parameters']));
 
         // Resource Module
