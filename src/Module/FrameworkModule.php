@@ -81,6 +81,8 @@ class FrameworkModule extends TransformationModule
      */
     protected function transform(array $config)
     {
+        $this->bind('BEAR\Sunday\Extension\Application\AppInterface')->to($config['app_class'])->in(Scope::SINGLETON);
+
         // Sunday Module
         $this->install(new NamedModule($this->createNamedConstants($config)));
         $this->install(new CacheModule());
@@ -115,8 +117,6 @@ class FrameworkModule extends TransformationModule
         } elseif ($this->context == 'test') {
             $this->install(new NullCacheModule());
         }
-
-        $this->bind('BEAR\Sunday\Extension\Application\AppInterface')->to($config['app_class'])->in(Scope::SINGLETON);
     }
 
     /**
