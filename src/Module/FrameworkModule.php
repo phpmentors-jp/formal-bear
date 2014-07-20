@@ -108,7 +108,6 @@ class FrameworkModule extends TransformationModule
         if ($this->context == 'api') {
             $this->install(new HalModule());
         } elseif ($this->context == 'prod') {
-            $this->install(new CacheAspectModule($this));
         } elseif ($this->context == 'dev') {
             $this->install(new ApplicationLoggerModule());
             $this->install(new DevResourceModule());
