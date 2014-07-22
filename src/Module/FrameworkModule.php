@@ -87,12 +87,12 @@ class FrameworkModule extends TransformationModule
         // Sunday Module
         $this->install(new NamedModule($this->createNamedConstants($config)));
         $this->install(new CacheModule());
-        $this->install(new CachedAnnotationModule());
+        $this->install(new CachedAnnotationModule($this));
 
         // Package Module
         $this->install(new CacheAspectModule($this));
-        $this->install(new DiCompilerModule());
-        $this->install(new DiModule());
+        $this->install(new DiCompilerModule($this));
+        $this->install(new DiModule($this));
         $this->install(new ExceptionHandleModule());
         $this->install(new ResourceModule($config['app_name'], $config['resource_dir']));
         $this->install(new SignalParamModule($this, $config['signal_parameters']));
@@ -108,14 +108,14 @@ class FrameworkModule extends TransformationModule
 
         // Contextual Binding
         if ($this->context == 'api') {
-            $this->install(new HalModule());
+            $this->install(new HalModule($this));
         } elseif ($this->context == 'prod') {
         } elseif ($this->context == 'dev') {
             $this->install(new ApplicationLoggerModule());
-            $this->install(new DevResourceModule());
-            $this->install(new DevApplicationLoggerModule());
+            $this->install(new DevResourceModule($this));
+            $this->install(new DevApplicationLoggerModule($this));
         } elseif ($this->context == 'test') {
-            $this->install(new NullCacheModule());
+            $this->install(new NullCacheModule($this));
         }
     }
 
