@@ -34,8 +34,6 @@ use BEAR\Sunday\Module\Constant\NamedModule;
 use Ray\Di\AbstractModule;
 use Ray\Di\Di\Scope;
 
-use PHPMentors\FormalBEAR\Framework\Config\FrameworkConfiguration;
-
 class FrameworkModule extends TransformationModule
 {
     /**
