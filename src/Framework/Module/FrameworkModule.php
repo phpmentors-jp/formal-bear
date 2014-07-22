@@ -84,8 +84,11 @@ class FrameworkModule extends TransformationModule
         $this->bind('BEAR\Sunday\Extension\Application\AppInterface')->to($config['app_class'])->in(Scope::SINGLETON);
         $this->bind('BEAR\Resource\SchemeCollectionInterface')->toProvider('PHPMentors\FormalBEAR\Framework\Module\Provider\SchemeCollectionProvider')->in(Scope::SINGLETON);
 
+        $frameworkConstants = $this->createFrameworkConstants($config);
+        $this->exportFrameworkParameters($frameworkConstants);
+
         // Sunday Module
-        $this->install(new NamedModule($this->createNamedConstants($config)));
+        $this->install(new NamedModule($frameworkConstants + $config['named_constants']));
         $this->install(new CacheModule());
         $this->install(new CachedAnnotationModule($this));
 
@@ -123,11 +126,29 @@ class FrameworkModule extends TransformationModule
      * @param  array $config
      * @return array
      */
-    private function createNamedConstants(array $config)
+    private function createFrameworkConstants(array $config)
     {
         return [
-            'package_dir' => dirname(dirname(dirname(dirname((new \ReflectionClass('BEAR\Package\Module\Package\PackageModule'))->getFileName())))),
+            'app_class' => $config['app_class'],
             'app_context' => $this->context,
-        ] + $config['named_constants'];
+            'app_dir' => $this->appDir,
+            'app_name' => $config['app_name'],
+            'lib_dir' => $config['lib_dir'],
+            'log_dir' => $config['log_dir'],
+            'package_dir' => dirname(dirname(dirname(dirname((new \ReflectionClass('BEAR\Package\Module\Package\PackageModule'))->getFileName())))),
+            'resource_dir' => $config['resource_dir'],
+            'tmp_dir' => $config['tmp_dir'],
+            'var_dir' => $this->appDir . '/var',
+        ];
+    }
+
+    /**
+     * @param array $config
+     */
+    private function exportFrameworkParameters(array $frameworkConstants)
+    {
+        foreach ($frameworkConstants as $key => $value) {
+            $this->getConfigCollection()->setParameter('framework.' . $key, $value);
+        }
     }
 }

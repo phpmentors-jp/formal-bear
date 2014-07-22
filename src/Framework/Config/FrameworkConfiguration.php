@@ -44,17 +44,6 @@ class FrameworkConfiguration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $treeBuilder->root('framework')
-            ->validate()
-                ->always()->then(function ($v) {
-                    foreach ($v as $key => $value) {
-                        if (!in_array($key, ['named_constants', 'signal_parameters'])) {
-                            $v['named_constants'][$key] = $value;
-                        }
-                    }
-
-                    return $v;
-                })
-            ->end()
             ->children()
                 ->scalarNode('app_name')
                     ->defaultValue($this->namespace)
