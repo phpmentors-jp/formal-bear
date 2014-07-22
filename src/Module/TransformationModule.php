@@ -60,9 +60,10 @@ abstract class TransformationModule extends AbstractModule implements ConfigAwar
      */
     protected function configure()
     {
-        $config = (new Processor())->processConfiguration($this->createConfiguration(), $this->configCollection[ $this->getModuleID() ]);
-        $config = $this->configCollection->resolveParameterPlaceHolders($config);
-        $this->transform($config);
+        $this->transform((new Processor())->processConfiguration(
+            $this->createConfiguration(),
+            $this->configCollection->resolveParameterPlaceHolders($this->configCollection[ $this->getModuleID() ])
+        ));
     }
 
     /**
