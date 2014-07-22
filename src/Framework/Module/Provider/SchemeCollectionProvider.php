@@ -19,7 +19,7 @@
  * distribution, and is available at http://opensource.org/licenses/BSD-3-Clause
  */
 
-namespace PHPMentors\FormalBEAR\Module\Provider;
+namespace PHPMentors\FormalBEAR\Framework\Module\Provider;
 
 use BEAR\Resource\Adapter\Http;
 use BEAR\Resource\Exception\AppName;
@@ -28,7 +28,7 @@ use Ray\Di\ProviderInterface;
 use Ray\Di\InstanceInterface;
 use Ray\Di\Di\Inject;
 use Ray\Di\Di\Named;
-use PHPMentors\FormalBEAR\Resource\AppAdapter;
+use PHPMentors\FormalBEAR\Framework\Resource\AppAdapter;
 
 /**
  * SchemeCollection provider

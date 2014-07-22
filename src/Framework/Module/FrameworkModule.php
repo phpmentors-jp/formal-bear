@@ -10,7 +10,7 @@
  * distribution, and is available at http://opensource.org/licenses/BSD-2-Clause
  */
 
-namespace PHPMentors\FormalBEAR\Module;
+namespace PHPMentors\FormalBEAR\Framework\Module;
 
 use BEAR\Package\Dev\Module\ExceptionHandle\ExceptionHandleModule;
 use BEAR\Package\Module\Cache\CacheAspectModule;
@@ -34,7 +34,7 @@ use BEAR\Sunday\Module\Constant\NamedModule;
 use Ray\Di\AbstractModule;
 use Ray\Di\Di\Scope;
 
-use PHPMentors\FormalBEAR\Config\FrameworkConfiguration;
+use PHPMentors\FormalBEAR\Framework\Config\FrameworkConfiguration;
 
 class FrameworkModule extends TransformationModule
 {
@@ -82,7 +82,7 @@ class FrameworkModule extends TransformationModule
     protected function transform(array $config)
     {
         $this->bind('BEAR\Sunday\Extension\Application\AppInterface')->to($config['app_class'])->in(Scope::SINGLETON);
-        $this->bind('BEAR\Resource\SchemeCollectionInterface')->toProvider('PHPMentors\FormalBEAR\Module\Provider\SchemeCollectionProvider')->in(Scope::SINGLETON);
+        $this->bind('BEAR\Resource\SchemeCollectionInterface')->toProvider('PHPMentors\FormalBEAR\Framework\Module\Provider\SchemeCollectionProvider')->in(Scope::SINGLETON);
 
         // Sunday Module
         $this->install(new NamedModule($this->createNamedConstants($config)));

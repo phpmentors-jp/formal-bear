@@ -10,18 +10,18 @@
  * distribution, and is available at http://opensource.org/licenses/BSD-2-Clause
  */
 
-namespace PHPMentors\FormalBEAR\Module;
+namespace PHPMentors\FormalBEAR\Framework\Module;
 
 use Ray\Aop\AbstractMatcher;
 use Ray\Di\AbstractModule;
 use Ray\Di\ModuleStringerInterface;
 
-use PHPMentors\FormalBEAR\Config\ConfigReader;
+use PHPMentors\FormalBEAR\Framework\Config\ConfigReader;
 
 abstract class EntryModule extends AbstractModule implements ConfigAwareInterface
 {
     /**
-     * @var \PHPMentors\FormalBEAR\Config\ConfigCollection
+     * @var \PHPMentors\FormalBEAR\Framework\Config\ConfigCollection
      */
     private $configCollection;
 
@@ -52,8 +52,8 @@ abstract class EntryModule extends AbstractModule implements ConfigAwareInterfac
     }
 
     /**
-     * @param  \PHPMentors\FormalBEAR\Config\ConfigReader     $configReader
-     * @return \PHPMentors\FormalBEAR\Config\ConfigCollection
+     * @param  \PHPMentors\FormalBEAR\Framework\Config\ConfigReader     $configReader
+     * @return \PHPMentors\FormalBEAR\Framework\Config\ConfigCollection
      */
     abstract protected function readConfig(ConfigReader $configReader);
 }

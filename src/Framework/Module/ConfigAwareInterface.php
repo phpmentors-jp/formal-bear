@@ -10,7 +10,7 @@
  * distribution, and is available at http://opensource.org/licenses/BSD-2-Clause
  */
 
-namespace PHPMentors\FormalBEAR\Module;
+namespace PHPMentors\FormalBEAR\Framework\Module;
 
 interface ConfigAwareInterface
 {

@@ -19,7 +19,7 @@
  * distribution, and is available at http://opensource.org/licenses/BSD-3-Clause
  */
 
-namespace PHPMentors\FormalBEAR\Resource;
+namespace PHPMentors\FormalBEAR\Framework\Resource;
 
 use BEAR\Resource\Adapter\AdapterInterface;
 use BEAR\Resource\Adapter\Iterator\AppIterator;

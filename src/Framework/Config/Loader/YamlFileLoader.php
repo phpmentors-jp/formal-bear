@@ -32,14 +32,14 @@
  * THE SOFTWARE.
  */
 
-namespace PHPMentors\FormalBEAR\Config\Loader;
+namespace PHPMentors\FormalBEAR\Framework\Config\Loader;
 
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Yaml\Parser;
 
-use PHPMentors\FormalBEAR\Config\ConfigCollection;
+use PHPMentors\FormalBEAR\Framework\Config\ConfigCollection;
 
 /**
  * YamlFileLoader loads YAML files service definitions.
@@ -53,7 +53,7 @@ use PHPMentors\FormalBEAR\Config\ConfigCollection;
 class YamlFileLoader extends FileLoader
 {
     /**
-     * @var \PHPMentors\FormalBEAR\Config\ConfigCollection
+     * @var \PHPMentors\FormalBEAR\Framework\Config\ConfigCollection
      */
     private $configCollection;
 
@@ -63,8 +63,8 @@ class YamlFileLoader extends FileLoader
     private $parser;
 
     /**
-     * @param \PHPMentors\FormalBEAR\Config\ConfigCollection $configCollection
-     * @param \Symfony\Component\Config\FileLocatorInterface $locator
+     * @param \PHPMentors\FormalBEAR\Framework\Config\ConfigCollection $configCollection
+     * @param \Symfony\Component\Config\FileLocatorInterface           $locator
      */
     public function __construct(ConfigCollection $configCollection, FileLocatorInterface $locator)
     {
